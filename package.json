@@ -5,13 +5,16 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "build": "vite build"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "typescript": "^5.8.3"
+    "@types/node": "^24.0.8",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.0",
+    "vite-plugin-static-copy": "^3.1.0"
   }
 }
