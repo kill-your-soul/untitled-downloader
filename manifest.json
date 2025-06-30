@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "Untitled Album Downloader",
+  "version": "1.0",
+  "description": "Скачивает все треки альбома с Untitled.stream",
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "downloads",
+    "webRequest",
+    "cookies",
+    "notifications",
+    "storage",
+    "unlimitedStorage",
+    "offscreen"
+  ],
+  "background": {
+    "service_worker": "js/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://untitled.stream/*"],
+      "js": ["js/content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["js/jszip.min.js", "html/offscreen.html"],
+      "matches": ["https://untitled.stream/*"]
+    }
+  ],
+  "action": {
+    "default_title": "Untitled Downloader"
+  }
+}
