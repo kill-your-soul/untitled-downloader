@@ -20,6 +20,12 @@ jobs:
         with:
           node-version: '20' # Используем актуальную LTS-версию Node.js
 
+      - name: Get package version
+        id: package-version
+        # Эта команда использует Node.js, чтобы прочитать package.json и извлечь поле version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+
       - name: Install dependencies
         run: npm install
 
@@ -36,10 +42,9 @@ jobs:
       - name: Create Release and Upload Asset
         uses: softprops/action-gh-release@v2
         with:
-          # Имя тега и релиза будет основано на дате и времени, например: 2025-09-12-1530
-          tag_name: ${{ format('release-{0}', github.run_number) }}
-          name: Release ${{ github.run_number }}
-          body: "Automatic assembly of the extension."
+          # Используем версию из package.json для тега и названия релиза
+          tag_name: v${{ steps.package-version.outputs.version }}
+          name: Release v${{ steps.package-version.outputs.version }}
           files: extension.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

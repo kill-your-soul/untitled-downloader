@@ -1,6 +1,10 @@
 import { defineConfig } from 'vite'
 import path from 'path'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
+import fs from 'fs' // 1. Импортируем fs
+
+// 2. Читаем и парсим package.json
+const packageJson = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf-8'));
 
 export default defineConfig({
   build: {
@@ -17,13 +21,23 @@ export default defineConfig({
       },
     },
     outDir: 'dist',
-    // Очищать папку dist только при первой сборке
     emptyOutDir: true, 
   },
   plugins: [
     viteStaticCopy({
       targets: [
-        { src: 'public/manifest.json', dest: '.' },
+        // 3. Модифицируем копирование манифеста
+        {
+          src: 'public/manifest.json',
+          dest: '.',
+          transform: (content) => {
+            const manifest = JSON.parse(content.toString());
+            // Устанавливаем версию из package.json
+            manifest.version = packageJson.version;
+            // Возвращаем измененный манифест в виде красивой JSON-строки
+            return JSON.stringify(manifest, null, 2);
+          }
+        },
         { src: 'src/js/jszip.min.js', dest: 'js' },
         { src: 'src/html/offscreen.html', dest: 'html' },
       ],
