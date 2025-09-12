@@ -169,13 +169,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
 
         const contentBlob = await zip.generateAsync({ type: "blob" });
-        // console.log(
-        //   `[Untitled Downloader] ZIP-архив (Blob) сгенерирован, blob size: ${contentBlob.size} ${contentBlob}`
-        // );
         console.log(contentBlob);
-        // const reader = new FileReader();
-        // const url = URL.createObjectURL(contentBlob);
-        // console.log(`[Untitled Downloader] URL для скачивания создан: ${url}`);
         const existingContexts = await chrome.runtime.getContexts({});
         const offscreenDocument = existingContexts.find(
           (c) => c.contextType === "OFFSCREEN_DOCUMENT"
@@ -183,7 +177,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const url = chrome.runtime.getURL("html/offscreen.html");
         console.log(
           `[Untitled Downloader] URL для offscreen документа: ${url}`
-        ); 
+        );
         if (!offscreenDocument) {
           try {
             await chrome.offscreen.createDocument({
@@ -207,43 +201,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           `[Untitled Downloader] Найден offscreen клиент: ${client?.url}`
         );
         const mc = new MessageChannel();
-        client.postMessage({blob: contentBlob,
-          archiveName: message.albumName || "downloaded_tracks.zip"}, [mc.port2]);
+        client.postMessage(
+          {
+            blob: contentBlob,
+            archiveName: message.albumName || "downloaded_tracks.zip",
+          },
+          [mc.port2]
+        );
         const res = await new Promise((cb) => (mc.port1.onmessage = cb));
-
-        // reader.onload = () => {
-        //   const dataUrl = reader.result;
-
-        //   chrome.downloads.download(
-        //     {
-        //       url: dataUrl,
-        //       filename: `${message.albumName || "downloaded_tracks"}.zip`,
-        //       saveAs: true,
-        //     },
-        //     (downloadId) => {
-        //       if (chrome.runtime.lastError) {
-        //         console.error(
-        //           "[Untitled Downloader] Ошибка при запуске скачивания:",
-        //           chrome.runtime.lastError
-        //         );
-        //       } else {
-        //         console.log(
-        //           "[Untitled Downloader] Скачивание началось. downloadId:",
-        //           downloadId
-        //         );
-        //       }
-        //     }
-        //   );
-        // };
-
-        // reader.onerror = (e) => {
-        //   console.error(
-        //     "[Untitled Downloader] Ошибка FileReader при чтении ZIP-архива:",
-        //     e
-        //   );
-        // };
-
-        // reader.readAsDataURL(contentBlob);
       } catch (error) {
         console.log(
           "[Untitled Downloader] Глобальная ошибка в 'downloadSigned':",

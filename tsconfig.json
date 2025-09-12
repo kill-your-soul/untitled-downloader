@@ -10,6 +10,11 @@
         "moduleResolution": "node",
         "allowJs": false,
         "skipLibCheck": true,   
+        "lib": [
+            "ES2023",
+            "DOM",
+            "WebWorker"
+        ],
     },
     "include": [
         "src",

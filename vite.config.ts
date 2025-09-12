@@ -6,23 +6,37 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        background: path.resolve(__dirname, 'src/js/background.js'),
-        content: path.resolve(__dirname, 'src/js/content.js'),
+        background: path.resolve(__dirname, 'src/ts/background.ts'),
+        content: path.resolve(__dirname, 'src/ts/content.ts'),
         offscreen: path.resolve(__dirname, 'src/ts/offscreen.ts'),
       },
-      output: {
-        entryFileNames: 'js/[name].js',
-        chunkFileNames: 'js/[name].js',
-        assetFileNames: (assetInfo) => {
-          if (assetInfo.name && assetInfo.name.endsWith('.js')) {
-            return 'js/[name][extname]'
-          }
-          if (assetInfo.name && assetInfo.name.endsWith('.css')) {
-            return 'css/[name][extname]'
-          }
-          return '[name][extname]'
+      output: [
+        {
+          format: 'es',
+          inlineDynamicImports: false,
+          entryFileNames: (chunk) => {
+            // Don't create a separate file for the 'content' script in this output
+            if (chunk.name === 'content') {
+              return 'unused/[name].js';
+            }
+            return 'js/[name].js';
+          },
+          chunkFileNames: 'js/[name].js',
+          assetFileNames: 'assets/[name][extname]',
         },
-      },
+        {
+          format: 'iife',
+          inlineDynamicImports: false,
+          entryFileNames: (chunk) => {
+            // Only create the 'content' script in this iife output
+            if (chunk.name === 'content') {
+              return 'js/content.js';
+            }
+            return 'unused/[name]-iife.js';
+          },
+          assetFileNames: 'assets/[name][extname]',
+        },
+      ],
     },
     outDir: 'dist',
     emptyOutDir: true,

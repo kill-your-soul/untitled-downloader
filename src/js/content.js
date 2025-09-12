@@ -223,7 +223,9 @@
       }
 
       try {
-        const match = track.audio_url.match(/private-audio\/(.+\.(mp3|m4a|wav|flac))/);
+        const match = track.audio_url.match(
+          /private-audio\/(.+\.(mp3|m4a|wav|flac|aac|ogg|wma|alac|aiff|opus))$/i
+        );
         if (!match) {
           console.log(
             "[Untitled Downloader] Неверный формат URL:",
@@ -489,304 +491,15 @@
   console.log("[Untitled Downloader] Инициализация при первой загрузке");
   handleUrlChange();
 
-  // function loadJSZip() {
-  //   return new Promise((resolve, reject) => {
-  //     if (window.JSZip) return resolve(window.JSZip);
-  //     const script = document.createElement("script");
-  //     script.src = chrome.runtime.getURL("jszip.min.js");
-  //     script.onload = () => resolve(window.JSZip);
-  //     script.onerror = reject;
-  //     document.head.appendChild(script);
-  //   });
-  // }
-
-  // Добавьте этот обработчик в content.js
-  // chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  //   if (message.action === "downloadZip") {
-  //     console.log(message);
-  //     console.log("[Untitled Downloader] Скачивание ZIP запущено");
-  //     const blob = message.data;
-  //     console.log(blob);
-  //     const albumName = message.albumName || "downloaded_tracks.zip";
-
-  //     const url = URL.createObjectURL(blob);
-  //     const a = document.createElement("a");
-  //     a.href = url;
-  //     a.download = albumName;
-  //     a.style.display = "none";
-  //     document.body.appendChild(a);
-  //     a.click();
-  //     a.remove();
-  //     URL.revokeObjectURL(url);
-  //   }
-  // });
-
-  // chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  //   if (message.action === "downloadZipReady") {
-  //     console.log(
-  //       "[Untitled Downloader] Получено сообщение о готовности к скачиванию ZIP"
-  //     );
-  //     chrome.storage.local.get(
-  //       ["zipBuffer", "albumName"],
-  //       ({ zipBuffer, albumName }) => {
-  //         if (!zipBuffer) return;
-  //         const blob = new Blob([new Uint8Array(zipBuffer)], {
-  //           type: "application/zip",
-  //         });
-  //         const url = URL.createObjectURL(blob);
-  //         const a = document.createElement("a");
-  //         a.href = url;
-  //         a.download = `${albumName || "downloaded_tracks"}.zip`;
-  //         document.body.appendChild(a);
-  //         a.click();
-  //         setTimeout(() => {
-  //           URL.revokeObjectURL(url);
-  //           a.remove();
-  //           chrome.storage.local.remove(["zipBuffer", "albumName"]);
-  //         }, 1000);
-  //       }
-  //     );
-  //   }
-  // });
-
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "status") {
       // Покажите статус пользователю (например, в элементе на странице)
       showStatus(message.status);
     }
+    if (message.action === "remove") {
+      hideStatus();
+    }
   });
-
-  // chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  //   if (message.action === "initiateDownloadFromStorage") {
-  //     console.log(
-  //       "[Untitled Downloader CS] Получен сигнал 'initiateDownloadFromStorage'. Загрузка из chrome.storage.local..."
-  //     );
-  //     chrome.storage.local.get(
-  //       ["zipArrayBufferForDownload", "albumNameForDownload"],
-  //       (data) => {
-  //         if (chrome.runtime.lastError) {
-  //           const errMsg = `Ошибка при получении данных из storage: ${chrome.runtime.lastError.message}`;
-  //           console.log("[Untitled Downloader CS]", errMsg);
-  //           alert(errMsg);
-  //           // Возможно, отправить сообщение об ошибке обратно в background или обновить UI
-  //           return;
-  //         }
-  //         if (!data.zipArrayBufferForDownload || !data.albumNameForDownload) {
-  //           const errMsg =
-  //             "Архив или имя альбома не найдены во временном хранилище.";
-  //           console.log("[Untitled Downloader CS]", errMsg, data);
-  //           alert(errMsg);
-  //           return;
-  //         }
-
-  //         console.log(
-  //           `[Untitled Downloader CS] Получен ArrayBuffer (size: ${data.zipArrayBufferForDownload.byteLength}) и имя альбома: ${data.albumNameForDownload}`
-  //         );
-  //         try {
-  //           const blob = new Blob([data.zipArrayBufferForDownload], {
-  //             type: "application/zip",
-  //           });
-  //           const url = URL.createObjectURL(blob);
-  //           const a = document.createElement("a");
-  //           a.href = url;
-  //           a.download = `${data.albumNameForDownload}.zip`;
-  //           document.body.appendChild(a);
-  //           console.log(
-  //             "[Untitled Downloader CS] Инициирование клика по ссылке для скачивания."
-  //           );
-  //           a.click();
-  //           console.log(
-  //             "[Untitled Downloader CS] Клик по ссылке для скачивания выполнен."
-  //           );
-
-  //           // Очистка
-  //           setTimeout(() => {
-  //             if (a.parentElement) {
-  //               document.body.removeChild(a);
-  //             }
-  //             URL.revokeObjectURL(url);
-  //             chrome.storage.local.remove(
-  //               ["zipArrayBufferForDownload", "albumNameForDownload"],
-  //               () => {
-  //                 if (chrome.runtime.lastError) {
-  //                   console.log(
-  //                     "[Untitled Downloader CS] Ошибка при очистке storage:",
-  //                     chrome.runtime.lastError.message
-  //                   );
-  //                 } else {
-  //                   console.log("[Untitled Downloader CS] Storage очищен.");
-  //                 }
-  //               }
-  //             );
-  //           }, 200);
-  //         } catch (e) {
-  //           const errMsg = `Ошибка в content.js при создании Blob или скачивании: ${e.message}`;
-  //           console.log("[Untitled Downloader CS]", errMsg, e);
-  //           alert(errMsg);
-  //         }
-  //       }
-  //     );
-  //     // Для этого сообщения content script не отправляет ответ, поэтому return true не нужен.
-  //   } else if (message.action === "initiateDownloadFromIndexedDB") {
-  //     console.log(
-  //       "[Untitled Downloader CS] Получен сигнал 'initiateDownloadFromIndexedDB'."
-  //     );
-  //     const dbName = "FileStorageDB";
-  //     const storeName = "zipFiles";
-  //     const fileKey = "currentZipFile";
-
-  //     console.log(
-  //       `[Untitled Downloader CS] Попытка открытия IndexedDB: ${dbName}, версия: 1`
-  //     );
-  //     const openRequest = indexedDB.open(dbName, 1);
-
-  //     // openRequest.onupgradeneeded = function(event) {
-  //     //     console.log("[Untitled Downloader CS] onupgradeneeded FIRED.");
-  //     //     const db = event.target.result;
-  //     //     const transaction = event.target.transaction;
-  //     //     console.log(`[Untitled Downloader CS] Текущие object store names в onupgradeneeded: ${Array.from(db.objectStoreNames).join(', ')}`);
-  //     //     if (!db.objectStoreNames.contains(storeName)) {
-  //     //         try {
-  //     //             console.log(`[Untitled Downloader CS] Создание object store: ${storeName}`);
-  //     //             db.createObjectStore(storeName);
-  //     //             console.log(`[Untitled Downloader CS] Object store ${storeName} успешно ЗАПРОШЕН к созданию в onupgradeneeded.`);
-  //     //         } catch (e) {
-  //     //             console.log(`[Untitled Downloader CS] ОШИБКА при вызове createObjectStore '${storeName}':`, e);
-  //     //             if (transaction) transaction.abort();
-  //     //         }
-  //     //     } else {
-  //     //         console.log(`[Untitled Downloader CS] Object store ${storeName} уже существует в onupgradeneeded.`);
-  //     //     }
-  //     //     if (transaction) {
-  //     //         transaction.oncomplete = () => console.log("[Untitled Downloader CS] Транзакция onupgradeneeded ЗАВЕРШЕНА.");
-  //     //         transaction.onerror = (e) => console.log("[Untitled Downloader CS] ОШИБКА транзакции onupgradeneeded:", e.target.error);
-  //     //         transaction.onabort = (e) => console.warn("[Untitled Downloader CS] Транзакция onupgradeneeded ПРЕРВАНА:", e.target.error);
-  //     //     }
-  //     // };
-
-  //     openRequest.onerror = function (event) {
-  //       console.log(
-  //         "[Untitled Downloader CS] Ошибка ОТКРЫТИЯ IndexedDB:",
-  //         event.target.error
-  //       );
-  //       alert(
-  //         "Ошибка: не удалось получить доступ к временному хранилищу файлов (IndexedDB)."
-  //       );
-  //     };
-
-  //     openRequest.onsuccess = function (event) {
-  //       console.log(
-  //         "[Untitled Downloader CS] IndexedDB успешно открыта (onsuccess)."
-  //       );
-  //       const db = event.target.result;
-
-  //       console.log(
-  //         `[Untitled Downloader CS] Версия базы данных при открытии: ${db.version}`
-  //       );
-  //       const storeNamesFound = Array.from(db.objectStoreNames);
-  //       console.log(
-  //         `[Untitled Downloader CS] Доступные object store names в onsuccess: ${
-  //           storeNamesFound.join(", ") || "(пусто)"
-  //         }`
-  //       );
-
-  //       if (!storeNamesFound.includes(storeName)) {
-  //         console.log(
-  //           `[Untitled Downloader CS] КРИТИЧЕСКАЯ ОШИБКА: Object store '${storeName}' НЕ НАЙДЕН в onsuccess. Имеющиеся сторы: [${storeNamesFound.join(
-  //             ", "
-  //           )}]. Попробуйте полностью перезагрузить расширение и страницу, или удалить IndexedDB вручную.`
-  //         );
-  //         alert(
-  //           `Критическая ошибка: Хранилище файлов '${storeName}' не найдено. Это может потребовать перезагрузки расширения или очистки данных сайта.`
-  //         );
-  //         db.close();
-  //         return;
-  //       }
-
-  //       console.log(
-  //         `[Untitled Downloader CS] Попытка начать транзакцию для '${storeName}'.`
-  //       );
-  //       try {
-  //         const transaction = db.transaction(storeName, "readonly");
-  //         const store = transaction.objectStore(storeName);
-
-  //         // Attempt to read DEBUG entry
-  //         const getDebugRequest = store.get("debugTestEntry_background");
-  //         getDebugRequest.onsuccess = function (debugEvent) {
-  //           console.log(
-  //             "[Untitled Downloader CS] DEBUG: Результат getRequest для 'debugTestEntry_background':",
-  //             debugEvent.target.result
-  //           );
-  //         };
-  //         getDebugRequest.onerror = function (debugErrEvent) {
-  //           console.error(
-  //             "[Untitled Downloader CS] DEBUG: Ошибка чтения 'debugTestEntry_background':",
-  //             debugErrEvent.target.error
-  //           );
-  //         };
-
-  //         // Attempt to read MAIN entry (currentZipFile)
-  //         const getMainRequest = store.get("currentZipFile"); // Your original fileKey
-  //         getMainRequest.onsuccess = function (mainEvent) {
-  //           const storedData = mainEvent.target.result;
-  //           console.log(
-  //             "[Untitled Downloader CS] Результат getRequest для 'currentZipFile':",
-  //             storedData
-  //           );
-  //           if (storedData && storedData.arrayBuffer) {
-  //             // ... process main data
-  //           } else {
-  //             console.error(
-  //               "[Untitled Downloader CS] Данные 'currentZipFile' не найдены или неверный формат."
-  //             );
-  //           }
-  //         };
-  //         getMainRequest.onerror = function (mainErrEvent) {
-  //           console.error(
-  //             "[Untitled Downloader CS] Ошибка чтения 'currentZipFile':",
-  //             mainErrEvent.target.error
-  //           );
-  //         };
-
-  //         transaction.oncomplete = function () {
-  //           console.log("[Untitled Downloader CS] Read transaction completed.");
-  //           // db.close(); // Close db after all reads are done or in their individual handlers
-  //         };
-  //         transaction.onerror = function () {
-  //           console.error("[Untitled Downloader CS] Read transaction error.");
-  //           // db.close();
-  //         };
-  //       } catch (e) {
-  //         console.error(
-  //           "[Untitled Downloader CS] Error creating read transaction:",
-  //           e
-  //         );
-  //         // db.close();
-  //       }
-  //     };
-  //   } else if (message.action === "error") {
-  //     const displayErrorMessage =
-  //       typeof message.error === "string"
-  //         ? message.error
-  //         : message.error?.message || "Произошла неизвестная ошибка.";
-  //     console.log(
-  //       "[Untitled Downloader CS] Получена ошибка от background:",
-  //       displayErrorMessage
-  //     );
-  //     alert("Ошибка скачивания: " + displayErrorMessage);
-  //     // Сброс UI, если необходимо
-  //     const progressContainerEl = document.getElementById(
-  //       "untitled-download-progress"
-  //     );
-  //     const downloadBtnEl = document.getElementById("untitled-download-btn");
-  //     if (progressContainerEl) progressContainerEl.style.display = "none";
-  //     if (downloadBtnEl) {
-  //       downloadBtnEl.disabled = false;
-  //       downloadBtnEl.style =
-  //         "btn is-secondary subhead-semibold pointer-events-auto flex h-44 w-100 items-center justify-center rounded-[16px] p-0 transition-opacity hover:opacity-80";
-  //     }
-  //   }
-  // });
 
   function showStatus(text) {
     let statusDiv = document.getElementById("untitled-downloader-status");
@@ -805,36 +518,10 @@
     }
     statusDiv.textContent = text;
   }
+  function hideStatus() {
+    const statusDiv = document.getElementById("untitled-downloader-status");
+    if (statusDiv) {
+      statusDiv.remove();
+    }
+  }
 })();
-
-// const receivedChunks = [];
-// let totalChunksExpected = 0;
-// let filename = "downloaded.zip";
-
-// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-//   if (message.action === "blob-chunk") {
-//     console.log(
-//       `[Content] Получен чанк ${message.index + 1}/${message.totalChunks}`
-//     );
-//     receivedChunks[message.index] = message.buffer;
-//     totalChunksExpected = message.totalChunks;
-//     filename = message.filename || filename;
-//   }
-
-//   if (message.action === "blob-done") {
-//     console.log("[Content] Все чанки получены, собираем Blob...");
-//     const blob = new Blob(receivedChunks, { type: "application/zip" });
-//     сonsole.log("[Content] Blob собран, размер:", blob.size);
-//     const url = URL.createObjectURL(blob);
-
-//     const a = document.createElement("a");
-//     a.href = url;
-//     a.download = filename;
-//     a.style.display = "none";
-//     document.body.appendChild(a);
-//     a.click();
-//     document.body.removeChild(a);
-
-//     console.log("[Content] Файл сохранён:", filename);
-//   }
-// });

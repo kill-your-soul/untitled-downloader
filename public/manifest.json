@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Untitled Album Downloader",
-  "version": "1.0",
+  "version": "0.2",
   "description": "Скачивает все треки альбома с Untitled.stream",
   "host_permissions": [
     "<all_urls>"
@@ -18,7 +18,8 @@
     "offscreen"
   ],
   "background": {
-    "service_worker": "js/background.js"
+    "service_worker": "js/background.js",
+    "type": "module"
   },
   "content_scripts": [
     {
