@@ -1,0 +1,45 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Необходимо для создания релиза
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Используем актуальную LTS-версию Node.js
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build extension
+        run: npm run build
+
+      - name: Create ZIP archive
+        # Эта команда создаст zip-архив 'extension.zip' из содержимого папки 'dist'
+        run: |
+          cd dist
+          zip -r ../extension.zip .
+          cd ..
+
+      - name: Create Release and Upload Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          # Имя тега и релиза будет основано на дате и времени, например: 2025-09-12-1530
+          tag_name: ${{ format('release-{0}', github.run_number) }}
+          name: Release ${{ github.run_number }}
+          body: "Automatic assembly of the extension."
+          files: extension.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
