@@ -63,7 +63,7 @@
 //   return signedTracks;
 // }
 
-import { getCookieString } from "../utils";
+import { getCookieString, log } from "../utils";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 секунда
@@ -76,12 +76,14 @@ async function getSignedUrl(objectPath: string): Promise<string> {
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
+      log(encodeURIComponent(objectPath));
+      log(objectPath);
       const response = await fetch(
         "https://untitled.stream/api/storage/buckets/private-audio/objects/" +
           encodeURIComponent(objectPath) +
-          "/signedUrl",
+          "/signedUrl?download=true",
         {
-          method: "POST",
+          method: "GET",
           headers: {
             accept: "*/*",
             "accept-language": "en-US,en;q=0.9",
@@ -90,7 +92,7 @@ async function getSignedUrl(objectPath: string): Promise<string> {
             origin: "https://untitled.stream",
             referer: window.location.href,
           },
-          body: JSON.stringify({ durationInSeconds: 10800 }),
+          // body: JSON.stringify({ durationInSeconds: 10800 }),
           credentials: "include",
         }
       );

@@ -97,7 +97,7 @@ import { cache } from "./content/cache";
 import { createDownloadButton, removeDownloadButton, updateProgress, resetButtonState, showStatus, clearStatus } from "./content/dom";
 import { initObserver } from "./content/observer";
 
-console.log("[Untitled Downloader] content.ts инициализирован");
+console.log("[Untitled Downloader] content.ts initialized");
 
 interface TrackData {
   tracks: any[];
