@@ -95,25 +95,40 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
         for (const track of message.tracks) {
           log(`Downloading track: ${track.filename}`);
-          try {
-            const response = await fetch(track.signedUrl);
-            log(`Fetch response for ${track.filename}: status ${response.status}`);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const blob = await response.blob();
-            log(`Blob received for ${track.filename}, size: ${blob.size}`);
-            zip.file(track.filename, blob);
-            downloadedCount++;
-            log(`Track ${track.filename} added to ZIP (${downloadedCount}/${totalTracks})`);
+          
+          const maxRetries = 3;
+          let attempt = 0;
+          let success = false;
 
-            await sendMessageToActiveTab({
-              action: "progress",
-              progress: (downloadedCount / totalTracks) * 100,
-            });
-          } catch (trackError: any) {
-            const errMsg = `Failed to download ${track.filename}: ${trackError.name || "Error"} - ${trackError.message || trackError}`;
-            log(errMsg);
-            sendResponse({ error: errMsg });
-            return;
+          while (attempt < maxRetries && !success) {
+            attempt++;
+            try {
+              const response = await fetch(track.signedUrl);
+              log(`Fetch response for ${track.filename}: status ${response.status} (attempt ${attempt})`);
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              const blob = await response.blob();
+              log(`Blob received for ${track.filename}, size: ${blob.size}`);
+              zip.file(track.filename, blob);
+              downloadedCount++;
+              log(`Track ${track.filename} added to ZIP (${downloadedCount}/${totalTracks})`);
+
+              await sendMessageToActiveTab({
+                action: "progress",
+                progress: (downloadedCount / totalTracks) * 100,
+              });
+              success = true;
+            } catch (trackError: any) {
+              log(`Attempt ${attempt} failed for ${track.filename}: ${trackError.message}`);
+              if (attempt >= maxRetries) {
+                const errMsg = `Failed to download ${track.filename} after ${maxRetries} attempts: ${trackError.name || "Error"} - ${trackError.message || trackError}`;
+                log(errMsg);
+                sendResponse({ error: errMsg });
+                return;
+              }
+              await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+            }
           }
         }
 
