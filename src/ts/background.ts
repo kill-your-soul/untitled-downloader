@@ -24,7 +24,7 @@ const getAllCookies = async (details: CookieQueryDetails): Promise<chrome.cookie
   let cookiesWithPartitionKey: chrome.cookies.Cookie[] = [];
   if (partitionKey) {
     try {
-      cookiesWithPartitionKey = await chrome.cookies.getAll(details as any); // TS не знает про partitionKey
+      cookiesWithPartitionKey = await chrome.cookies.getAll(details as any); // TS doesn't know about partitionKey
     } catch {
       cookiesWithPartitionKey = [];
     }

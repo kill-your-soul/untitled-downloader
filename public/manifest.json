@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Untitled Album Downloader",
   "version": "0.2",
-  "description": "Скачивает все треки альбома с Untitled.stream",
+  "description": "Downloads all tracks from an album on Untitled.stream",
   "host_permissions": [
     "<all_urls>"
   ],

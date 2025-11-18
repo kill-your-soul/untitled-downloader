@@ -66,12 +66,12 @@
 import { getCookieString } from "../utils";
 
 const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000; // 1 секунда
+const RETRY_DELAY = 1000; // 1 second
 
 async function getSignedUrl(objectPath: string): Promise<string> {
   const cookieString = await getCookieString();
   if (!cookieString) {
-    throw new Error("Не удалось получить куки");
+    throw new Error("Failed to get cookies");
   }
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
@@ -98,13 +98,13 @@ async function getSignedUrl(objectPath: string): Promise<string> {
       if (response.ok) {
         const data = await response.json();
         if (!data.url) {
-          throw new Error("Ответ не содержит url");
+          throw new Error("Response does not contain url");
         }
         return data.url;
       }
 
       if (response.status === 504 && attempt < MAX_RETRIES) {
-        console.warn(`[Untitled Downloader] Попытка ${attempt}: Ошибка 504 (Gateway Timeout). Повтор через ${RETRY_DELAY} мс...`);
+        console.warn(`[Untitled Downloader] Attempt ${attempt}: Error 504 (Gateway Timeout). Retrying in ${RETRY_DELAY} ms...`);
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
         continue;
       }
@@ -112,29 +112,29 @@ async function getSignedUrl(objectPath: string): Promise<string> {
       throw new Error(`HTTP error! status: ${response.status}`);
 
     } catch (error) {
-      console.error(`[Untitled Downloader] Ошибка при получении signedUrl (попытка ${attempt}):`, error);
+      console.error(`[Untitled Downloader] Error getting signedUrl (attempt ${attempt}):`, error);
       if (attempt < MAX_RETRIES) {
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
       } else {
-        throw error; // Пробрасываем ошибку после последней попытки
+        throw error; // Rethrow error after last attempt
       }
     }
   }
-  throw new Error("Не удалось получить подписанную ссылку после нескольких попыток.");
+  throw new Error("Failed to get signed URL after multiple attempts.");
 }
 
 export async function collectSignedUrls(tracks: any[]): Promise<{ signedUrl: string; filename: string }[]> {
   const signedTracks = [];
   for (const track of tracks) {
     if (!track.audio_url) {
-      console.warn("[Untitled Downloader] Трек не содержит audio_url:", track);
+      console.warn("[Untitled Downloader] Track does not contain audio_url:", track);
       continue;
     }
 
     try {
       const match = track.audio_url.match(/private-audio\/(.+\.(mp3|m4a|wav|flac|aac|ogg|wma|alac|aiff|opus))$/i);
       if (!match) {
-        console.warn("[Untitled Downloader] Неверный формат URL:", track.audio_url);
+        console.warn("[Untitled Downloader] Invalid URL format:", track.audio_url);
         continue;
       }
 
@@ -144,8 +144,8 @@ export async function collectSignedUrls(tracks: any[]): Promise<{ signedUrl: str
 
       signedTracks.push({ signedUrl, filename });
     } catch (error) {
-      console.error("[Untitled Downloader] Ошибка при получении подписанной ссылки для трека:", track.title, error);
-      // Продолжаем сборку остальных треков, даже если один не удался
+      console.error("[Untitled Downloader] Error getting signed URL for track:", track.title, error);
+      // Continue collecting remaining tracks, even if one fails
       continue;
     }
   }
