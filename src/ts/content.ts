@@ -124,7 +124,7 @@ async function handleTrackData(json: any) {
   currentTrackData = { tracks, albumName };
   await cache.setAlbum(window.location.href, tracks);
   
-  // Если мы на странице проекта, сразу вставляем кнопку
+  // If we're on the project page, insert the button immediately
   if (window.location.href.includes('/library/project/')) {
     insertButtonForCurrentPage();
   }
@@ -138,20 +138,20 @@ function insertButtonForCurrentPage() {
 }
 
 function resetState() {
-  console.log("[Untitled Downloader] Сброс состояния");
+  console.log("[Untitled Downloader] Resetting state");
   removeDownloadButton();
   currentTrackData = null;
 }
 
 async function handleUrlChange() {
-  console.log("[Untitled Downloader] Обработка изменения URL:", window.location.href);
+  console.log("[Untitled Downloader] Handling URL change:", window.location.href);
   resetState();
   
   const cachedTracks = await cache.getAlbum(window.location.href);
   if (cachedTracks) {
-    console.log("[Untitled Downloader] Используем кешированные треки");
-    // Нам нужно получить название альбома, которого нет в кеше треков.
-    // Пока просто сохраняем треки, `handleTrackData` должен будет обновить и название.
+    console.log("[Untitled Downloader] Using cached tracks");
+    // We need to get the album name, which is not in the track cache.
+    // For now, just save the tracks, `handleTrackData` will update the name later.
     currentTrackData = { tracks: cachedTracks, albumName: "Unknown Album" };
     insertButtonForCurrentPage();
   }
@@ -178,7 +178,7 @@ function setupMessageListener() {
         if (message.action === "progress") {
             updateProgress(message.progress);
         } else if (message.action === "error") {
-            console.error("[Untitled Downloader] Ошибка при скачивании:", message.error);
+            console.error("[Untitled Downloader] Download error:", message.error);
             resetButtonState();
         } else if (message.action === "status") {
             showStatus(message.status);

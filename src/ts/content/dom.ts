@@ -43,7 +43,7 @@ export function createDownloadButton(
 
         const signedTracks = await collectSignedUrls(tracks);
         console.log(
-          "[Untitled Downloader] Отправляем сообщение для скачивания:",
+          "[Untitled Downloader] Sending download message:",
           signedTracks
         );
 
@@ -53,14 +53,14 @@ export function createDownloadButton(
           albumName: albumName,
         });
       } catch (error) {
-        console.log("[Untitled Downloader] Ошибка при отправке сообщения:", error);
+        console.log("[Untitled Downloader] Error sending message:", error);
         resetButtonState();
         if (error instanceof Error && error.message.includes("Extension context invalidated")) {
           window.location.reload();
         }
       }
     } else {
-      console.warn("[Untitled Downloader] Треки ещё не загружены.");
+      console.warn("[Untitled Downloader] Tracks not yet loaded.");
     }
   });
 
@@ -114,7 +114,7 @@ export function removeDownloadButton() {
   const btn = document.getElementById("untitled-download-btn");
   const progress = document.getElementById("untitled-download-progress");
   if (btn) {
-    // Вместо прямого удаления, удаляем родительский wrapper
+    // Instead of direct removal, remove the parent wrapper
     btn.parentElement?.remove();
   }
   if(progress) {

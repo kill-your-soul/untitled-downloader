@@ -5,7 +5,7 @@ export function initObserver(callback: (data: any) => void) {
       const decoded = decodeURIComponent(url);
 
       if (decoded.includes("_data=routes/library.project.$projectSlug")) {
-        console.log("[Untitled Downloader] Обнаружен проектный запрос:", decoded);
+        console.log("[Untitled Downloader] Project request detected:", decoded);
 
         fetch(url, { credentials: "include" })
           .then(async (res) => {
@@ -16,7 +16,7 @@ export function initObserver(callback: (data: any) => void) {
             }
           })
           .catch((err) => {
-            console.log("[Untitled Downloader] Ошибка запроса:", err);
+            console.log("[Untitled Downloader] Request error:", err);
           });
       }
     }

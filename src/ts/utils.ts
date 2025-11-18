@@ -38,7 +38,7 @@ export async function getCookieString(): Promise<string> {
         const response = await sendMessageToBackground({ action: "getCookies" });
         return response?.cookieString || "";
     } catch (error) {
-        console.log("Ошибка при получении кук:", error);
+        console.log("Error getting cookies:", error);
         return "";
     }
 }

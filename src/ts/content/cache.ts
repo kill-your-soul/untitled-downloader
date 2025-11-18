@@ -34,41 +34,41 @@
 
 const CACHE_KEY = "untitled_albums_cache";
 
-// Получить все данные из кеша
+// Get all data from cache
 async function getCache(): Promise<Record<string, any[]>> {
   try {
     const result = await chrome.storage.local.get(CACHE_KEY);
     return result[CACHE_KEY] || {};
   } catch (e) {
-    console.error("[Untitled Downloader] Ошибка чтения из chrome.storage:", e);
+    console.error("[Untitled Downloader] Error reading from chrome.storage:", e);
     return {};
   }
 }
 
-// Записать все данные в кеш
+// Save all data to cache
 async function setCache(data: Record<string, any[]>): Promise<void> {
   try {
     await chrome.storage.local.set({ [CACHE_KEY]: data });
   } catch (e) {
-    console.error("[Untitled Downloader] Ошибка записи в chrome.storage:", e);
+    console.error("[Untitled Downloader] Error writing to chrome.storage:", e);
   }
 }
 
-// Получить треки для конкретного альбома (URL)
+// Get tracks for a specific album (URL)
 async function getAlbum(url: string): Promise<any[] | null> {
   const cacheData = await getCache();
   const tracks = cacheData[url];
   if (tracks) {
-    console.log("[Untitled Downloader] Получены треки из кеша для", url, ":", tracks);
+    console.log("[Untitled Downloader] Got tracks from cache for", url, ":", tracks);
   }
   return tracks || null;
 }
 
-// Сохранить треки для конкретного альбома (URL)
+// Save tracks for a specific album (URL)
 async function setAlbum(url: string, tracks: any[]): Promise<void> {
   const cacheData = await getCache();
   cacheData[url] = tracks;
-  console.log("[Untitled Downloader] Сохраняем треки в кеш для", url, ":", tracks);
+  console.log("[Untitled Downloader] Saving tracks to cache for", url, ":", tracks);
   await setCache(cacheData);
 }
 
